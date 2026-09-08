@@ -1,0 +1,13 @@
+---
+description: Milo Maps build rules
+alwaysApply: true
+---
+
+Cursor is the component builder of record.
+
+- Pull UI from the Stitch project via MCP before inventing screens.
+- Keep DESIGN.md tokens (navy panels, accent blue/mint, 14px cards).
+- Never put GEMINI_API_KEY in client code.
+- Always render Google Maps source names + links and the words "Google Maps".
+- Plot only grounded sources. Do not invent coordinates.
+- Public deploy requires restricted keys, App Check, and Firestore rules in this repo.

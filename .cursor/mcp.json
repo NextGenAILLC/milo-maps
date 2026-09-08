@@ -1,0 +1,10 @@
+{
+  "mcpServers": {
+    "stitch": {
+      "url": "https://stitch.googleapis.com/mcp",
+      "headers": {
+        "X-Goog-Api-Key": "REPLACE_WITH_STITCH_OR_GEMINI_KEY"
+      }
+    }
+  }
+}
