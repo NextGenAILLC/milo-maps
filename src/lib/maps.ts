@@ -1,22 +1,42 @@
-const LIBRARIES = "places,marker,routes";
+/**
+ * Google Maps loader with lazy script injection
+ */
 
+let mapsLoaded = false;
+let mapsPromise: Promise<void> | null = null;
+
+/**
+ * Load Google Maps API library
+ * @param apiKey Google Maps API key (restricted to Maps JS API)
+ * @returns Promise that resolves when Maps is ready
+ */
 export function loadMaps(apiKey: string): Promise<void> {
-  if (!apiKey) return Promise.reject(new Error("Missing VITE_GOOGLE_MAPS_API_KEY"));
-  if (window.google?.maps) return Promise.resolve();
-  const existing = document.querySelector<HTMLScriptElement>("script[data-milo-maps]");
-  if (existing) {
-    return new Promise((resolve, reject) => {
-      existing.addEventListener("load", () => resolve());
-      existing.addEventListener("error", () => reject(new Error("Maps script failed")));
-    });
+  if (mapsPromise) {
+    return mapsPromise;
   }
-  return new Promise((resolve, reject) => {
-    const s = document.createElement("script");
-    s.dataset.miloMaps = "1";
-    s.async = true;
-    s.src = `https://maps.googleapis.com/maps/api/js?key=${encodeURIComponent(apiKey)}&v=weekly&libraries=${LIBRARIES}`;
-    s.onload = () => resolve();
-    s.onerror = () => reject(new Error("Maps script failed"));
-    document.head.appendChild(s);
+
+  if (mapsLoaded && window.google?.maps) {
+    return Promise.resolve();
+  }
+
+  mapsPromise = new Promise((resolve, reject) => {
+    const script = document.createElement('script');
+    script.src = `https://maps.googleapis.com/maps/api/js?key=${encodeURIComponent(apiKey)}&libraries=maps,marker&v=beta`;
+    script.async = true;
+    script.defer = true;
+
+    script.addEventListener('load', () => {
+      mapsLoaded = true;
+      resolve();
+    });
+
+    script.addEventListener('error', () => {
+      mapsPromise = null;
+      reject(new Error('Failed to load Google Maps API'));
+    });
+
+    document.head.appendChild(script);
   });
+
+  return mapsPromise;
 }

@@ -1,18 +1,41 @@
-export type LatLng = { lat: number; lng: number };
+/**
+ * Type definitions for Milo Maps application
+ */
 
-export type PlaceHit = {
+export interface LatLng {
+  lat: number;
+  lng: number;
+}
+
+export interface PlaceHit {
   name: string;
   url?: string;
   placeId?: string;
-  lat?: number;
-  lng?: number;
-};
+  lat?: number | null;
+  lng?: number | null;
+}
 
-export type MiloReply = {
+export interface MiloReply {
   text: string;
   sources: PlaceHit[];
   error?: string;
   demo?: boolean;
-};
+}
 
-export type SavedPlace = PlaceHit & { id: string; savedAt: number };
+export interface SavedPlace extends PlaceHit {
+  id: string;
+  userId: string;
+  savedAt: number;
+}
+
+export interface AskRequest {
+  prompt: string;
+  location: LatLng;
+}
+
+export interface AskResponse {
+  text: string;
+  sources: PlaceHit[];
+  error?: string;
+  demo?: boolean;
+}
