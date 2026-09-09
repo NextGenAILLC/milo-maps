@@ -1,0 +1,17 @@
+name: vercel
+on:
+  push:
+    branches: [main]
+  pull_request:
+jobs:
+  deploy:
+    if: ${{ secrets.VERCEL_TOKEN != '' }}
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: amondnet/vercel-action@v25
+        with:
+          vercel-token: ${{ secrets.VERCEL_TOKEN }}
+          vercel-org-id: team_E8Vo83eUkrvq0eCEB7kRWG0I
+          vercel-project-id: prj_uQZWhmKKG348Fq5jJNMHrB4YbmZk
+          vercel-args: ${{ github.ref == 'refs/heads/main' && '--prod' || '' }}
