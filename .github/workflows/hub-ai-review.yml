@@ -1,0 +1,43 @@
+# LM Studio + Perplexity Hub - AI review on every pull request.
+# Needs repo/org secret PERPLEXITY_API_KEY (GitHub-hosted runners),
+# or set repo variable HUB_RUNNER=self-hosted + HUB_LOCAL_URL=http://127.0.0.1:4000 to review on your own PC with LM Studio.
+name: Hub AI Review
+on:
+  pull_request:
+    types: [opened, synchronize, reopened, ready_for_review]
+permissions:
+  contents: read
+  pull-requests: write
+concurrency:
+  group: hub-ai-review-${{ github.event.pull_request.number }}
+  cancel-in-progress: true
+jobs:
+  review:
+    if: ${{ !github.event.pull_request.draft && github.event.pull_request.head.repo.full_name == github.repository }}
+    runs-on: ${{ vars.HUB_RUNNER || 'ubuntu-latest' }}
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - name: Build diff
+        shell: bash
+        run: git diff "origin/${{ github.base_ref }}...HEAD" -- . ':(exclude)package-lock.json' ':(exclude)pnpm-lock.yaml' ':(exclude)yarn.lock' > pr.diff
+      - name: Review
+        shell: bash
+        env:
+          PERPLEXITY_API_KEY: ${{ secrets.PERPLEXITY_API_KEY }}
+          HUB_LOCAL_URL: ${{ vars.HUB_LOCAL_URL }}
+          HUB_LOCAL_MODEL: ${{ vars.HUB_LOCAL_MODEL }}
+        run: node .github/scripts/hub-ai.mjs review pr.diff > review.md
+      - name: Comment
+        if: ${{ hashFiles('review.md') != '' }}
+        shell: bash
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          [ -s review.md ] || exit 0
+          gh pr comment "${{ github.event.pull_request.number }}" --body-file review.md --edit-last || gh pr comment "${{ github.event.pull_request.number }}" --body-file review.md
