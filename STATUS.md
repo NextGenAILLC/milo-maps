@@ -1,4 +1,4 @@
-# Status — 2026-09-08
+# Status — 2026-09-30
 
 ## Done
 - Public repo: https://github.com/NextGenAILLC/milo-maps
@@ -6,6 +6,7 @@
 - API: local server, Firebase Function, Vercel `/api/ask`
 - Firestore rules + Auth hooks
 - Cursor/Stitch MCP stubs
+- **Amber Trails design system applied** (branch `amber-trails-design`): warm cream/terracotta tonal palette, Plus Jakarta Sans + Be Vietnam Pro, no-line rule, gradient CTAs, rounded cards. Gemini + Firebase logic untouched.
 
 ## Live
 - Site deploys without keys in **demo mode**
