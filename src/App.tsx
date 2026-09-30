@@ -136,30 +136,30 @@ export default function App() {
           </div>
         </div>
         <div className="ask">
-          <form onSubmit={submit}
+          <form onSubmit={submit}>
             <textarea
               value={prompt}
               onChange={(e) => setPrompt(e.target.value)}
               placeholder="Ask Milo for places, routes, or a day plan"
             />
             <div className="row">
-              <button type="submit" disabled={busy}
+              <button type="submit" disabled={busy}>
                 {busy ? "Asking…" : "Ask Milo"}
               </button>
               {fbOn && !user && (
-                <button type="button" className="chip" onClick={() => signInGoogle()}
+                <button type="button" className="chip" onClick={() => signInGoogle()}>
                   Sign in
                 </button>
               )}
               {user && (
-                <button type="button" className="chip" onClick={() => signOutUser()}
+                <button type="button" className="chip" onClick={() => signOutUser()}>
                   Sign out
                 </button>
               )}
             </div>
             <div className="row" style={{ flexWrap: "wrap", marginTop: 4 }}>
               {PROMPTS.map((p) => (
-                <button key={p} type="button" className="chip" onClick={() => setPrompt(p)}
+                <button key={p} type="button" className="chip" onClick={() => setPrompt(p)}>
                   {p}
                 </button>
               ))}
@@ -177,13 +177,13 @@ export default function App() {
             </div>
           )}
           {replies.map((r, i) => (
-            <article className="card" key={i}
+            <article className="card" key={i}>
               <h3>{r.error ? "Error" : r.demo ? "Demo reply" : "Milo"}</h3>
               <p className="answer">{r.error || r.text}</p>
               {r.sources.length > 0 && (
                 <div className="sources">
                   {r.sources.map((s, j) => (
-                    <a key={j} href={s.url || "#"} target="_blank" rel="noreferrer"
+                    <a key={j} href={s.url || "#"} target="_blank" rel="noreferrer">
                       {s.name}
                     </a>
                   ))}
@@ -194,9 +194,9 @@ export default function App() {
                   <button
                     key={j}
                     className="chip"
-                    style={{ marginTop: 8 }
-                    onClick={() => savePlace(user.uid, s)
-                  
+                    style={{ marginTop: 8 }}
+                    onClick={() => savePlace(user.uid, s)}
+                  >
                     Save {s.name}
                   </button>
                 ))}
@@ -209,9 +209,9 @@ export default function App() {
             <div className="card">
               <h3>Saved</h3>
               {saved.map((s) => (
-                <p key={s.id}
+                <p key={s.id}>
                   {s.name}{" "}
-                  <button className="chip" onClick={() => removeSaved(s.id)
+                  <button className="chip" onClick={() => removeSaved(s.id)}>
                     Remove
                   </button>
                 </p>
@@ -228,7 +228,7 @@ export default function App() {
             restricted Maps JS key is present.
           </div>
         )}
-        {mapsErr && <div className="overlay warn">{mapsErr}</div>
+        {mapsErr && <div className="overlay warn">{mapsErr}</div>}
         <div className="status">
           {mapsOk ? "Map live" : "Map standby"} · API {MAPS_KEY ? "key set" : "key missing"} ·{" "}
           {fbOn ? (user ? user.email : "auth ready") : "local saves off"}
