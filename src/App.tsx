@@ -82,7 +82,7 @@ export default function App() {
       setSaved([]);
       return;
     }
-    return watchSaved(user.uid, setSaved);
+    return watchSaved(user.uid, setSaved) ?? undefined;
   }, [user]);
 
   async function plot(sources: PlaceHit[]) {
