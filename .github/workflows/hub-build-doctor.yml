@@ -1,0 +1,43 @@
+# LM Studio + Perplexity Hub - when any listed workflow fails, diagnose it and open/update an issue.
+# apply-to-all-repos.ps1 fills in this repo's workflow names automatically.
+name: Hub Build Doctor
+on:
+  workflow_run:
+    workflows: ["ci", "vercel"]
+    types: [completed]
+permissions:
+  actions: read
+  contents: read
+  issues: write
+jobs:
+  diagnose:
+    if: ${{ github.event.workflow_run.conclusion == 'failure' }}
+    runs-on: ${{ vars.HUB_RUNNER || 'ubuntu-latest' }}
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - name: Fetch failed logs
+        shell: bash
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: gh run view ${{ github.event.workflow_run.id }} --repo "${{ github.repository }}" --log-failed > build.log || echo "could not fetch logs" > build.log
+      - name: Diagnose
+        shell: bash
+        env:
+          PERPLEXITY_API_KEY: ${{ secrets.PERPLEXITY_API_KEY }}
+          HUB_LOCAL_URL: ${{ vars.HUB_LOCAL_URL }}
+        run: node .github/scripts/hub-ai.mjs build build.log > diagnosis.md
+      - name: Open or update issue
+        shell: bash
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          [ -s diagnosis.md ] || exit 0
+          TITLE="Build failing: ${{ github.event.workflow_run.name }} on ${{ github.event.workflow_run.head_branch }}"
+          { echo "Run: ${{ github.event.workflow_run.html_url }}"; echo; cat diagnosis.md; } > body.md
+          gh label create hub-build-doctor --color B60205 --force >/dev/null 2>&1 || true
+          N=$(gh issue list --label hub-build-doctor --state open --search "$TITLE in:title" --json number -q '.[0].number')
+          if [ -n "$N" ]; then gh issue comment "$N" --body-file body.md; else gh issue create --title "$TITLE" --body-file body.md --label hub-build-doctor; fi
