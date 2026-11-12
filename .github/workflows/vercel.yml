@@ -5,11 +5,22 @@ on:
   pull_request:
 jobs:
   deploy:
-    if: ${{ secrets.VERCEL_TOKEN != '' }}
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+      - name: Check for Vercel token
+        id: vercel-token
+        env:
+          VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
+        run: |
+          if [ -n "$VERCEL_TOKEN" ]; then
+            echo "present=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "::warning::VERCEL_TOKEN secret is not set in this repository; skipping Vercel deploy. Add the secret (Settings > Secrets and variables > Actions) to enable deploys."
+            echo "present=false" >> "$GITHUB_OUTPUT"
+          fi
       - uses: amondnet/vercel-action@v25
+        if: steps.vercel-token.outputs.present == 'true'
         with:
           vercel-token: ${{ secrets.VERCEL_TOKEN }}
           vercel-org-id: team_E8Vo83eUkrvq0eCEB7kRWG0I
